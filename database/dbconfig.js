@@ -4,7 +4,7 @@ const dbconfig = {
     host: 'localhost',
     port: 3307,
     database: 'photography',
-    timezone: 'pdt',
+    timezone: '-07:00',
 }
 
 module.exports = dbconfig;

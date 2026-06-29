@@ -1,35 +1,56 @@
 var express = require('express');
 var router = express.Router();
-const mysql = require('mysql2');
+const connectionPool = require('../database/connectionPool');
+const PhotoRepository = require('../database/PhotoRepository');
+
+const repository = new PhotoRepository(connectionPool);
+
 
 /* GET /photos */
 router.get('/', function(req, res) {
-    const dbconfig = require('../dbconfig');
-    console.log('dbconfig:', dbconfig);
-
-    const db = mysql.createConnection(dbconfig);
-
-    db.connect((err) => {
-        if (err) throw err;
-        
-        const photo = {
-            ID: 6,
-            photoname: 'Beach',
-            Takendate: 6172026,
-            Camera: 'Film-35mm',
-            PeopleInIt: 'Jam, Jubuz, MJ, OG',
-            authorID: 1,
-        }
-
-        db.query('INSERT INTO photos SET ?', photo, (err, result) => {
-            if (err) throw err;
-            console.log(result);
-        });
-        
+    repository.getALL((err, result) => {
+        err 
+            ? res.status(500).json({ error: err.toString() })
+            : res.json(result);
     });
 
+})
 
-  res.send('photos list');
+// GET /photos/:id
+router.get('/:id', function(req, res) {
+    repository.get(req.params.id, (err, result) => {
+        err 
+            ? res.status(500).json({ error: err.toString() })
+            : res.json(result);
+    });
+})  
+
+// PUT /customer/:id
+router.put('/:id', function(req, res) {
+   repository.update(req.params.id, req.body, (err, result) => {
+        err ? res.status(500).json({error: err.toString()})
+        : res.sendStatus(200);
+    });
+});
+
+// DELETE /customer/:id
+router.delete('/:id', function(req, res) {
+    repository.delete(req.params.id, (err) => {
+        err 
+            ? res.status(500).json({error: err.toString()})
+            : res.sendStatus(200);
+    });
+});
+    
+
+
+// POST /photos
+router.post('/', function(req, res) {
+    repository.save(req.body, (err, result) => {
+        err ? res.status(500).json({error: err.toString()})
+        : res.sendStatus(200);
+    });
+    
 });
 
 module.exports = router;
