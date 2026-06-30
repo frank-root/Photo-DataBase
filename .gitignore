@@ -1,1 +1,6 @@
-#hello
+
+
+#ingnore all files
+*.env
+.env
+node_modules/
