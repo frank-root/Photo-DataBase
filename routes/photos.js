@@ -1,7 +1,9 @@
 var express = require('express');
 var router = express.Router();
+const path = require('path');
 const connectionPool = require('../database/connectionPool');
 const PhotoRepository = require('../database/PhotoRepository');
+const upload = require('../middleware/upload');
 
 const repository = new PhotoRepository(connectionPool);
 
@@ -19,11 +21,16 @@ router.get('/', function(req, res) {
 // GET /photos/:id
 router.get('/:id', function(req, res) {
     repository.get(req.params.id, (err, result) => {
-        err 
+        err
             ? res.status(500).json({ error: err.toString() })
             : res.json(result);
     });
-})  
+})
+
+// GET /photos/file/:filename
+router.get('/file/:filename', function(req, res) {
+    res.sendFile(path.join(__dirname, '../uploads', req.params.filename));
+})
 
 // PUT /customer/:id
 router.put('/:id', function(req, res) {
@@ -45,8 +52,13 @@ router.delete('/:id', function(req, res) {
 
 
 // POST /photos
-router.post('/', function(req, res) {
-    repository.save(req.body, (err, result) => {
+router.post('/', upload.single('photo'), function(req, res) {
+    const data = {
+        ...req.body,
+        filename: req.file.filename
+    };
+
+    repository.save(data, (err, result) => {
         err ? res.status(500).json({error: err.toString()})
         : res.sendStatus(200);
     });
