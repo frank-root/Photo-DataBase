@@ -53,6 +53,10 @@ router.delete('/:id', function(req, res) {
 
 // POST /photos
 router.post('/', upload.single('photo'), function(req, res) {
+    if (!req.file) {
+        return res.status(400).json({ error: 'No photo file provided' });
+    }
+
     const data = {
         ...req.body,
         filename: req.file.filename
@@ -62,7 +66,7 @@ router.post('/', upload.single('photo'), function(req, res) {
         err ? res.status(500).json({error: err.toString()})
         : res.sendStatus(200);
     });
-    
+
 });
 
 module.exports = router;
